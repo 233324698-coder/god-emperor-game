@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GOD EMPEROR ONLINE</title>
+<style>
+body{
+ margin:0;
+ font-family:Segoe UI;
+ background:radial-gradient(circle,#0f0c29,#1a1a2e);
+ color:white;
+ text-align:center;
+}
+h1{ text-shadow:0 0 20px red; }
+
+.ui{
+ width:1100px;
+ max-width:95%;
+ margin:25px auto;
+ padding:25px;
+ background:rgba(0,0,0,0.85);
+ border-radius:20px;
+ box-shadow:0 0 40px red;
+}
+
+button{
+ padding:10px 18px;
+ margin:6px;
+ border:none;
+ border-radius:10px;
+ cursor:pointer;
+ font-weight:bold;
+ background:linear-gradient(45deg,#ff512f,#dd2476);
+ color:white;
+}
+
+.bar{
+ height:18px;
+ background:#400;
+ border-radius:8px;
+ margin:5px 0;
+ overflow:hidden;
+}
+.bar-inner{
+ height:100%;
+ background:lime;
+}
+</style>
+</head>
+<body>
+
+<h1>👑 GOD EMPEROR ONLINE 👑</h1>
+
+<iframe width="0" height="0"
+src="https://www.youtube.com/embed/i41WAuzt2rg?autoplay=1&loop=1&playlist=i41WAuzt2rg"
+allow="autoplay"></iframe>
+
+<div id="game"></div>
+
+<script>
+
+// ===== SAVE SYSTEM =====
+function saveGame(){
+ localStorage.setItem("godSave",JSON.stringify({player,gold,inventory}));
+ alert("💾 บันทึกแล้ว!");
+}
+function loadGame(){
+ let data=localStorage.getItem("godSave");
+ if(data){
+  let d=JSON.parse(data);
+  player=d.player;
+  gold=d.gold;
+  inventory=d.inventory;
+  alert("โหลดสำเร็จ!");
+  mainMenu();
+ }
+}
+
+// ===== PLAYER =====
+let player=null;
+let gold=1000;
+let inventory=[];
+
+function chooseClass(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>🧙 เลือกคลาส</h2>
+ <button onclick="setClass('warrior')">⚔️ Warrior</button>
+ <button onclick="setClass('mage')">🔥 Mage</button>
+ <button onclick="setClass('assassin')">🗡 Assassin</button>
+ </div>`;
+}
+
+function setClass(type){
+ if(type==="warrior")
+  player={class:type,hp:800,maxHp:800,atk:80,def:60};
+ if(type==="mage")
+  player={class:type,hp:500,maxHp:500,atk:120,def:30};
+ if(type==="assassin")
+  player={class:type,hp:600,maxHp:600,atk:100,def:40};
+
+ inventory=["Potion"];
+ mainMenu();
+}
+
+// ===== MAIN MENU =====
+function mainMenu(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>🏠 MAIN MENU</h2>
+ 💰 Gold: ${gold}<br>
+ 🧙 Class: ${player.class}<br><br>
+ <button onclick="worldMap()">🌍 World Map</button>
+ <button onclick="shop()">🛒 Shop</button>
+ <button onclick="gacha()">🎲 Gacha</button>
+ <button onclick="inventoryMenu()">🎒 Inventory</button>
+ <button onclick="pvp()">👥 PVP</button>
+ <br><br>
+ <button onclick="saveGame()">💾 Save</button>
+ <button onclick="loadGame()">📂 Load</button>
+ </div>`;
+}
+
+// ===== WORLD MAP =====
+function worldMap(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>🌍 เลือกด่าน</h2>
+ <button onclick="battle('normal')">🌲 Forest</button>
+ <button onclick="battle('elite')">🔥 Volcano</button>
+ <button onclick="battle('boss')">👹 Abyss Castle</button>
+ <br><br>
+ <button onclick="mainMenu()">🔙 Back</button>
+ </div>`;
+}
+
+// ===== BATTLE =====
+let enemy;
+function battle(type){
+ if(type==="normal")
+  enemy={name:"Slime King",hp:400,maxHp:400,atk:40};
+ if(type==="elite")
+  enemy={name:"Demon Knight",hp:800,maxHp:800,atk:70};
+ if(type==="boss")
+  enemy={name:"Abyss Emperor",hp:1500,maxHp:1500,atk:90,phase:1};
+
+ fight();
+}
+
+function fight(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>⚔️ ${enemy.name}</h2>
+ ❤️ ${player.hp}/${player.maxHp}
+ <div class="bar"><div class="bar-inner" style="width:${(player.hp/player.maxHp)*100}%"></div></div>
+ 👹 ${enemy.hp}/${enemy.maxHp}
+ <div class="bar"><div class="bar-inner" style="width:${(enemy.hp/enemy.maxHp)*100}%;background:orange"></div></div>
+ <button onclick="attack()">⚔️ Attack</button>
+ <button onclick="mainMenu()">🏃 Run</button>
+ </div>`;
+}
+
+function attack(){
+ enemy.hp-=player.atk;
+ if(enemy.hp<=0){
+  gold+=300;
+  alert("ชนะ! +300 Gold");
+  mainMenu();
+  return;
+ }
+ player.hp-=enemy.atk;
+ if(player.hp<=0){
+  alert("แพ้!");
+  player.hp=player.maxHp;
+  mainMenu();
+  return;
+ }
+ fight();
+}
+
+// ===== SHOP =====
+function shop(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>🛒 SHOP</h2>
+ 💰 ${gold}<br>
+ <button onclick="buyPotion()">🧪 Potion (100)</button>
+ <button onclick="buyAtk()">⚔️ +20 ATK (300)</button>
+ <button onclick="buyDef()">🛡 +20 DEF (300)</button>
+ <br><br>
+ <button onclick="mainMenu()">🔙 Back</button>
+ </div>`;
+}
+
+function buyPotion(){ if(gold>=100){gold-=100;inventory.push("Potion");shop();}}
+function buyAtk(){ if(gold>=300){gold-=300;player.atk+=20;shop();}}
+function buyDef(){ if(gold>=300){gold-=300;player.def+=20;shop();}}
+
+// ===== INVENTORY =====
+function inventoryMenu(){
+ document.getElementById("game").innerHTML=`
+ <div class="ui">
+ <h2>🎒 Inventory</h2>
+ ${inventory.join("<br>")||"Empty"}
+ <br><br>
+ <button onclick="mainMenu()">🔙 Back</button>
+ </div>`;
+}
+
+// ===== GACHA =====
+function gacha(){
+ if(gold<500){alert("เงินไม่พอ");return;}
+ gold-=500;
+ let rand=Math.random();
+ let item;
+ if(rand<0.1){
+  item="💎 LEGENDARY SWORD +100 ATK";
+  player.atk+=100;
+ }else{
+  item="Rare Potion";
+  inventory.push("Potion");
+ }
+ alert("ได้: "+item);
+ mainMenu();
+}
+
+// ===== PVP =====
+function pvp(){
+ let p1=500,p2=500;
+ function render(){
+  document.getElementById("game").innerHTML=`
+  <div class="ui">
+  <h2>👥 PVP MODE</h2>
+  Player1 HP: ${p1}<br>
+  Player2 HP: ${p2}<br><br>
+  <button onclick="p1Atk()">P1 Attack</button>
+  <button onclick="p2Atk()">P2 Attack</button>
+  <br><br>
+  <button onclick="mainMenu()">🔙 Back</button>
+  </div>`;
+ }
+ window.p1Atk=function(){
+  p2-=50;
+  if(p2<=0){alert("Player1 Wins!");mainMenu();return;}
+  render();
+ }
+ window.p2Atk=function(){
+  p1-=50;
+  if(p1<=0){alert("Player2 Wins!");mainMenu();return;}
+  render();
+ }
+ render();
+}
+
+chooseClass();
+
+</script>
+</body>
+</html>
